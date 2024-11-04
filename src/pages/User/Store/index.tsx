@@ -1,14 +1,40 @@
 import Input from "@/components/form/Input";
+import UserService from "@/services/users/UserService";
 import { useState } from "react";
+
+interface User {
+    name: string;
+    email: string;
+}
 
 export default function UserStore() {
 
     const [name, setName] = useState<string>();
     const [email, setEmail] = useState<string>();
 
+    const handleAddUser = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (!name || !email) {
+            console.log("Nome e email são obrigatórios.");
+            return;
+        }
+
+        const user: User = {
+            name,
+            email,
+        };
+
+        const response = await UserService.createUser(user);
+        alert(response.message);
+
+        setName("");
+        setEmail("");
+    };
+
     return (
         <div className="h-screen flex items-center">
-            <form className="w-[300px] mx-auto">
+            <form className="w-[300px] mx-auto" method="POST" onSubmit={handleAddUser}>
                 <div className="mb-5">
                     <Input label="Nome" id="name" type="text" name="name" placeholder="Digite seu nome..." value={name} setValue={setName} />
                 </div>

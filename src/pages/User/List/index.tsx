@@ -1,28 +1,40 @@
 import TdTable from "@/components/table/TdTable";
 import ThTable from "@/components/table/ThTable";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { FaRegPenToSquare, FaTrash } from "react-icons/fa6";
+import UserService from '@/services/users/UserService';
 
-const users = [
-    {
-        id: 0,
-        name: 'Leslie Alexander',
-        email: 'leslie.alexander@example.com',
-    },
-    {
-        id: 1,
-        name: 'Michael Foster',
-        email: 'michael.foster@example.com',
-    },
-];
-
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
 
 export default function Users() {
+    const [users, setUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        const fetchUsers = async () => {
+            const data = await UserService.getUsers();
+            setUsers(data);
+        };
+
+        fetchUsers();
+    }, []);
+
+    async function handleDeleteUser(id: number) {
+        const response = await UserService.deleteUser(id);
+        alert(response.message);
+        setUsers((prev) => prev.filter(user => user.id !== id));
+    }
+
     return (
         <div className="pt-10">
             <table className="table-auto w-full">
                 <thead>
                     <tr>
+                        <ThTable label="Id" />
                         <ThTable label="Nome" />
                         <ThTable label="Email" />
                         <ThTable label="Ação" className="w-1" />
@@ -31,11 +43,14 @@ export default function Users() {
                 <tbody className="bg-white dark:bg-slate-800">
                     {
                         users.map((element) => (
-                            <tr>
-                                <TdTable key={element.id}>
+                            <tr key={element.id}>
+                                <TdTable>
+                                    {element.id}
+                                </TdTable>
+                                <TdTable>
                                     {element.name}
                                 </TdTable>
-                                <TdTable key={element.id}>
+                                <TdTable>
                                     {element.email}
                                 </TdTable>
                                 <TdTable>
@@ -48,14 +63,9 @@ export default function Users() {
                                                 <FaRegPenToSquare />
                                             </button>
                                         </Link>
-                                        <Link href={{
-                                            pathname: '',
-                                            query: { id: element.id },
-                                        }}>
-                                            <button className="bg-red-400 text-white p-2 rounded">
-                                                <FaTrash />
-                                            </button>
-                                        </Link>
+                                        <button className="bg-red-400 text-white p-2 rounded" onClick={() => handleDeleteUser(element.id)}>
+                                            <FaTrash />
+                                        </button>
                                     </div>
                                 </TdTable>
                             </tr>
